@@ -1,0 +1,15 @@
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Juan Rodriguez",
+  "email": "juan@rodriguez.org",
+  "password": "Hunter123",
+  "phones": [
+    {
+      "number": "1234567",
+      "citycode": "1",
+      "contrycode": "57"
+    }
+  ]
+}

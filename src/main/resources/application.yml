@@ -30,6 +30,12 @@ user:
 
 app:
   secret: "12345678912345678912345678912345678912345678912345678912345678912345689"
-  jwt:
-    access-token:
-      expiration: 3_600_000 # 1 hora en milisegundos
+
+security:
+  origins: "http://localhost:3000"
+
+jwt:
+  access-token:
+    expiration: 3_600_000 # 1 hora en milisegundos
+  refresh-token:
+    expiration: 2_592_000_000 # 30 días en milisegundos

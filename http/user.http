@@ -13,3 +13,8 @@ Content-Type: application/json
     }
   ]
 }
+
+### Obtener todos los usuarios
+GET http://localhost:8080/api/users
+Authorization: Bearer ----TOKEN----
+Content-Type: application/json

@@ -1,22 +1,25 @@
-package com.ejercicios.integracion_bci.service;
+package com.ejercicios.integracion_bci.security.service;
 
-import com.ejercicios.integracion_bci.dto.PhoneDTO;
-import com.ejercicios.integracion_bci.dto.UserRequestDTO;
-import com.ejercicios.integracion_bci.dto.UserResponseDTO;
-import com.ejercicios.integracion_bci.entity.Phone;
-import com.ejercicios.integracion_bci.entity.User;
-import com.ejercicios.integracion_bci.repository.UserRepository;
-import com.ejercicios.integracion_bci.util.JwtUtil;
+import com.ejercicios.integracion_bci.security.dto.UserCreateRequest;
+import com.ejercicios.integracion_bci.security.dto.UserDTO;
+import com.ejercicios.integracion_bci.security.entity.Phone;
+import com.ejercicios.integracion_bci.security.entity.User;
+import com.ejercicios.integracion_bci.security.repository.UserRepository;
+import com.ejercicios.integracion_bci.security.util.JwtUtil;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     @Value("${user.password.regex}")
@@ -26,13 +29,14 @@ public class UserService {
     private String emailRegex;
 
 
-    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
 
     @Transactional
-    public UserResponseDTO createUser(UserRequestDTO request) {
+    public UserDTO createUser(UserCreateRequest request) {
 
         if (userRepository.existsByEmail(request.email())) {
             throw new EntityExistsException("El correo ya registrado");
@@ -51,7 +55,7 @@ public class UserService {
         User user = new User();
         user.setName(request.name());
         user.setEmail(request.email());
-        user.setPassword(request.password()); // Como esto es un MVP no me preocupe por cifrar esto
+        user.setPassword(passwordEncoder.encode(request.password()));
         user.setActive(true);
         user.setToken(token);
 
@@ -65,7 +69,7 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return new UserResponseDTO(
+        return new UserDTO(
                 savedUser.getId(),
                 savedUser.getName(),
                 savedUser.getEmail(),
@@ -75,8 +79,28 @@ public class UserService {
                 savedUser.getLastLogin(),
                 savedUser.getToken(),
                 savedUser.getPhones().stream()
-                        .map(p -> new PhoneDTO(p.getNumber(), p.getCityCode(), p.getCountryCode()))
+                        .map(Phone::toDTO)
                         .toList()
         );
+    }
+
+    public User findByEmail(String email){
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con el email: " + email));
+    }
+
+    public List<User> findAll(){
+        return userRepository.findAll();
+    }
+
+    @Transactional
+    public void updateTokenByEmail(String email, String newToken) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con el email: " + email));
+
+        user.setToken(newToken);
+        user.setModified(LocalDateTime.now());
+
+        userRepository.save(user);
     }
 }

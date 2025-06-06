@@ -1,8 +1,8 @@
-package com.ejercicios.integracion_bci.dto;
+package com.ejercicios.integracion_bci.security.dto;
 
 import java.util.List;
 
-public record UserRequestDTO(
+public record UserCreateRequest(
         String name,
         String email,
         String password,

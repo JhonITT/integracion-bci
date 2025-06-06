@@ -1,5 +1,7 @@
-package com.ejercicios.integracion_bci.entity;
+package com.ejercicios.integracion_bci.security.entity;
 
+import com.ejercicios.integracion_bci.security.dto.PhoneDTO;
+import com.ejercicios.integracion_bci.security.dto.UserDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -35,6 +37,8 @@ public class User {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    // No veo el sentido de esto, imagino que es para que el usuario desde que se cree
+    // se le haga login
     @Column(name = "token")
     private String token;
 
@@ -42,7 +46,7 @@ public class User {
     private List<Phone> phones;
 
     @PrePersist
-    public void prePersist() {
+    protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         this.created = now;
         this.lastLogin = now;
@@ -50,8 +54,26 @@ public class User {
     }
 
     @PreUpdate
-    public void preUpdate() {
-        this.modified = LocalDateTime.now();
+    protected void onUpdate() {
+        LocalDateTime.now();
+    }
+
+    public UserDTO toDTO() {
+        List<PhoneDTO> phoneDTOs = this.getPhones().stream()
+                .map(Phone::toDTO)
+                .toList();
+
+        return new UserDTO(
+                this.getId(),
+                this.getName(),
+                this.getEmail(),
+                this.isActive(),
+                this.getCreated(),
+                this.getModified(),
+                this.getLastLogin(),
+                this.getToken(),
+                phoneDTOs
+        );
     }
 
     public UUID getId() {
@@ -132,5 +154,18 @@ public class User {
 
     public void setPhones(List<Phone> phones) {
         this.phones = phones;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id != null && id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

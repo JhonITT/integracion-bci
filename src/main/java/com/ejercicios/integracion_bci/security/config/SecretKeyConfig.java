@@ -1,4 +1,4 @@
-package com.ejercicios.integracion_bci.config;
+package com.ejercicios.integracion_bci.security.config;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

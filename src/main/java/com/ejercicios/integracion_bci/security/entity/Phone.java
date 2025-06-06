@@ -1,5 +1,6 @@
-package com.ejercicios.integracion_bci.entity;
+package com.ejercicios.integracion_bci.security.entity;
 
+import com.ejercicios.integracion_bci.security.dto.PhoneDTO;
 import jakarta.persistence.*;
 
 @Entity
@@ -24,6 +25,15 @@ public class Phone {
         this.cityCode = cityCode;
         this.countryCode = countryCode;
         this.user = user;
+    }
+
+    public PhoneDTO toDTO() {
+        return new PhoneDTO(
+                this.getId(),
+                this.getNumber(),
+                this.getCityCode(),
+                this.getCountryCode()
+        );
     }
 
     public Long getId() {

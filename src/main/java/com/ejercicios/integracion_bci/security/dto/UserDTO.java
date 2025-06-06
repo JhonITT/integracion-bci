@@ -1,4 +1,4 @@
-package com.ejercicios.integracion_bci.dto;
+package com.ejercicios.integracion_bci.security.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public record UserResponseDTO(
+public record UserDTO(
         UUID id,
         String name,
         String email,
